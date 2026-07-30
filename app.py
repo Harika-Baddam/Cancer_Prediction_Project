@@ -4,17 +4,57 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-df = pd.read_csv("colorectal_cancer_prediction.csv")
-df.columns = df.columns.str.lower().str.strip().str.replace(" ", "_")
+# Load data
+
+try:
+    df = pd.read_excel("colorectal_cancer_prediction.xlsx", engine="openpyxl")
+except Exception as e:
+    st.error(f"Error loading file: {e}")
+    st.stop()
+
+# -------------------------------
+# CLEAN COLUMN NAMES
+# -------------------------------
+df.columns = (
+    df.columns
+    .str.strip()
+    .str.lower()
+    .str.replace(r"[^\w]+", "_", regex=True)
+)
+
+# -------------------------------
+# SHOW DATA
+# -------------------------------
+st.subheader("Dataset Preview")
+st.write(df.head())
+# -------------------------------
+# SHOW DATA
+# -------------------------------
+st.subheader("Dataset Preview")
+st.write(df.head())
+
+# 🔥 IMPORTANT DEBUG
 st.write("Columns:", list(df.columns))
+
 # Check for missing values
 df.isnull().sum()
 
 #if missing
 df.ffill(inplace=True)
+# -------------------------------
+# SIMPLE PLOT (SAFE)
+# -------------------------------
+if "age" in df.columns:
+    st.subheader("Age Distribution")
+    fig, ax = plt.subplots()
+    sns.histplot(df["age"], kde=True, ax=ax)
+    st.pyplot(fig)
+else:
+    st.warning("No 'age' column found")
+
 
 # Visualize survival status distribution
-sns.countplot(x='survival_status', data=df)
+sns.countplot(x='survival_status', data=df)  # string
 plt.title("Survival Status Distribution")
 plt.show()
 
@@ -26,7 +66,7 @@ plt.title("Correlation Heatmap")
 plt.show()
 
 # EDA: Survival Status distribution
-sns.countplot(x='survival_status', data=df)
+sns.countplot(x='survival_status', data=df) #string
 plt.title("Survival Status Distribution")
 plt.show()
 # EDA: Correlation heatmap (numeric features only)
@@ -59,11 +99,11 @@ plt.show()
 # -------------------------------
 # Boxplots (numeric vs categorical)
 # -------------------------------
-sns.boxplot(x='survival_status', y='age', data=df)
+sns.boxplot(x='survival_status', y='age', data=df) # string
 plt.title("Age vs Survival Status")
 plt.show()
 
-sns.boxplot(x='recurrence', y='bmi', data=df)
+sns.boxplot(x='recurrence', y='bmi', data=df)  # string
 plt.title("BMI vs Recurrence")
 plt.show()
 
@@ -71,11 +111,11 @@ plt.show()
 # -------------------------------
 # Treatment vs outcomes
 # -------------------------------
-sns.countplot(x='chemotherapy_received', hue='survival_status', data=df)
+sns.countplot(x='chemotherapy_received', hue='survival_status', data=df)  # string
 plt.title("Chemotherapy vs Survival Status")
 plt.show()
 
-sns.countplot(x='Surgery_Received', hue='Recurrence', data=df)
+sns.countplot(x='Surgery_Received', hue='Recurrence', data=df)   # string
 plt.title("Surgery vs Recurrence")
 plt.show()
 
