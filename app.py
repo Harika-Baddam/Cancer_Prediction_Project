@@ -9,6 +9,7 @@ from sklearn.linear_model import LogisticRegression
 # Title
 st.title("🧬 Cancer Prediction App")
 st.write("Predict whether a tumor is Benign or Malignant")
+st.write(df.columns)
 
 # Load dataset
 df = pd.read_csv("colorectal_cancer_prediction.csv")
