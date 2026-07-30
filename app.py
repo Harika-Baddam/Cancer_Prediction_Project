@@ -11,7 +11,9 @@ st.title("🧬 Cancer Prediction App")
 st.write("Predict whether a tumor is Benign or Malignant")
 
 # Load dataset
-data = load_breast_cancer()
+df = pd.read_csv("colorectal_cancer_prediction.csv")
+df.columns = df.columns.str.lower().str.strip()
+st.write(df.head())
 X = pd.DataFrame(data.data, columns=data.feature_names)
 y = data.target
 
@@ -46,6 +48,8 @@ st.pyplot(fig)
 st.subheader("⚖️ BMI Distribution")
 
 if 'bmi' in df.columns:
+    st.write("BMI available")
+    st.write("Columns:", df.columns)
     fig, ax = plt.subplots()
     sns.histplot(df['bmi'], bins=30, kde=True, ax=ax)
     st.pyplot(fig)
