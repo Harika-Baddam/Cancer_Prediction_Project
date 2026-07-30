@@ -14,8 +14,6 @@ st.write("Predict whether a tumor is Benign or Malignant")
 df = pd.read_csv("colorectal_cancer_prediction.csv")
 df.columns = df.columns.str.lower().str.strip()
 st.write(df.head())
-X = df.drop(columns=["survival_status"])
-y = df["survival_status"]
 
 # Age Distribution
 st.subheader("📊 Age Distribution")
