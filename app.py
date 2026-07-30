@@ -5,7 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load data
-    df = pd.read_csv("colorectal_cancer_prediction.csv")
+df = pd.read_csv("colorectal_cancer_prediction.csv")
 
 # -------------------------------
 # CLEAN COLUMN NAMES
