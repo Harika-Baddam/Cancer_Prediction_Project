@@ -16,8 +16,6 @@ df = pd.read_csv("colorectal_cancer_prediction.csv")
 df.columns = df.columns.str.lower().str.strip()
 st.write(df.head())
 st.write(df.columns)
-# First define
-X = df.drop(columns=["survival_status"])
 
 # -------------------------------
 # SIDEBAR FILTER
@@ -107,6 +105,23 @@ fig, ax = plt.subplots()
 sns.countplot(x='Surgery_Received', hue='Recurrence', data=df, ax=ax)
 ax.set_title("Surgery vs Recurrence")
 st.pyplot(fig)
+
+# -------------------------------
+# FIND TARGET COLUMN AUTOMATICALLY
+# -------------------------------
+possible_targets = ["survival_status", "survival", "status", "outcome"]
+
+target_col = None
+
+for col in possible_targets:
+    if col in df.columns:
+        target_col = col
+        break
+
+if target_col is None:
+    st.error("❌ No target column found (survival/status)")
+    st.stop()
+
 
 # -------------------------------
 # MACHINE LEARNING MODEL (FINAL FIX)
