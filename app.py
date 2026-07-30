@@ -14,7 +14,7 @@ df.describe()
 corr = df.corr(numeric_only=True)
 
 df = df.drop(columns=['Patient_ID'], errors='ignore')
-df.columns = df.columns.str.lower().str.strip()
+df.columns = df.columns.str.lower().str.strip().str.replace(" ", "_")
 st.write(df.columns)
 # EDA: Survival Status distribution
 sns.countplot(x='survival_status', data=df)
