@@ -14,6 +14,8 @@ st.write("Predict whether a tumor is Benign or Malignant")
 df = pd.read_csv("colorectal_cancer_prediction.csv")
 df.columns = df.columns.str.lower().str.strip()
 st.write(df.head())
+# First define
+X = df.drop(columns=["survival_status"])
 
 # -------------------------------
 # SIDEBAR FILTER
@@ -104,47 +106,45 @@ sns.countplot(x='Surgery_Received', hue='Recurrence', data=df, ax=ax)
 ax.set_title("Surgery vs Recurrence")
 st.pyplot(fig)
 
-# Train model
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+# -------------------------------
+# MACHINE LEARNING MODEL (FINAL FIX)
+# -------------------------------
+st.subheader("🤖 Cancer Prediction Model")
 
-model = LogisticRegression(max_iter=5000)
-model.fit(X_scaled, y)
+if "survival_status" in df.columns:
 
-st.subheader("Enter Patient Data")
+    # ✅ DEFINE X AND y FIRST (THIS WAS MISSING)
+    X = df.drop(columns=["survival_status"])
+    y = df["survival_status"]
 
-# Create input fields (only few important features for simplicity)
-radius = st.number_input("Mean Radius", value=14.0)
-texture = st.number_input("Mean Texture", value=20.0)
-perimeter = st.number_input("Mean Perimeter", value=90.0)
-area = st.number_input("Mean Area", value=600.0)
-smoothness = st.number_input("Mean Smoothness", value=0.1)
+    # ✅ Use only numeric columns
+    X = X.select_dtypes(include=["number"])
 
-# Create input dataframe
-input_data = pd.DataFrame({
-    'mean radius': [radius],
-    'mean texture': [texture],
-    'mean perimeter': [perimeter],
-    'mean area': [area],
-    'mean smoothness': [smoothness]
-})
+    # ✅ Handle missing values
+    X = X.fillna(X.mean())
 
-# Fill missing columns with 0 (important step)
-for col in X.columns:
-    if col not in input_data.columns:
-        input_data[col] = 0
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LogisticRegression
 
-# Reorder columns
-input_data = input_data[X.columns]
+    # ✅ Split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-# Scale input
-input_scaled = scaler.transform(input_data)
+    # ✅ Scale
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
 
-# Prediction
-if st.button("Predict"):
-    prediction = model.predict(input_scaled)
+    # ✅ Train model
+    model = LogisticRegression(max_iter=5000)
+    model.fit(X_train, y_train)
 
-    if prediction[0] == 1:
-        st.success("✅ Prediction: Benign (No Cancer)")
-    else:
-        st.error("⚠️ Prediction: Malignant (Cancer)")
+    # ✅ Accuracy
+    accuracy = model.score(X_test, y_test)
+
+    st.success(f"✅ Model Accuracy: {round(accuracy*100,2)}%")
+
+else:
+    st.warning("❌ survival_status column not found")
