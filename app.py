@@ -13,9 +13,10 @@ df.describe()
 corr = df.corr(numeric_only=True)
 
 df = df.drop(columns=['Patient_ID'], errors='ignore')
-df.columns = df.columns.str.strip()
+df.columns = df.columns.str.lower().str.strip()
+st.write(df.columns)
 # EDA: Survival Status distribution
-sns.countplot(x='Survival_Status', data=df)
+sns.countplot(x='survival_status', data=df)
 plt.title("Survival Status Distribution")
 plt.show()
 # EDA: Correlation heatmap (numeric features only)
@@ -33,33 +34,33 @@ df_model = pd.get_dummies(df, drop_first=True)  # encoded for ML
 # -------------------------------
 # Numeric feature distributions
 # -------------------------------
-sns.histplot(df['Age'], bins=30, kde=True)
+sns.histplot(df['age'], bins=30, kde=True)
 plt.title("Age Distribution")
 plt.show()
 
-sns.histplot(df['BMI'], bins=30, kde=True)
+sns.histplot(df['bmi'], bins=30, kde=True)
 plt.title("BMI Distribution")
 plt.show()
 
-sns.histplot(df['Time_to_Recurrence'], bins=30, kde=True)
+sns.histplot(df['time_to_recurrence'], bins=30, kde=True)
 plt.title("Time to Recurrence Distribution")
 plt.show()
 
 # -------------------------------
 # Boxplots (numeric vs categorical)
 # -------------------------------
-sns.boxplot(x='Survival_Status', y='Age', data=df)
+sns.boxplot(x='survival_status', y='age', data=df)
 plt.title("Age vs Survival Status")
 plt.show()
 
-sns.boxplot(x='Recurrence', y='BMI', data=df)
+sns.boxplot(x='recurrence', y='bmi', data=df)
 plt.title("BMI vs Recurrence")
 plt.show()
 
 # -------------------------------
 # Treatment vs outcomes
 # -------------------------------
-sns.countplot(x='Chemotherapy_Received', hue='Survival_Status', data=df)
+sns.countplot(x='chemotherapy_received', hue='survival_status', data=df)
 plt.title("Chemotherapy vs Survival Status")
 plt.show()
 
@@ -70,7 +71,7 @@ plt.show()
 # -------------------------------
 # Correlation heatmap (numeric only)
 # -------------------------------
-corr = df[['Age','BMI','Time_to_Recurrence']].corr()
+corr = df[['age','bmi','time_to_recurrence']].corr()
 sns.heatmap(corr, annot=True, cmap='coolwarm')
 plt.title("Correlation Heatmap")
 plt.show()
