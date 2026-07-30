@@ -11,7 +11,15 @@ st.title("🧬 Cancer Prediction App")
 st.write("Predict whether a tumor is Benign or Malignant")
 
 # Load dataset
-df = pd.read_excel("colorectal_cancer_prediction.xlsx")
+import os
+
+file_path = "colorectal_cancer_prediction.xlsx"
+
+if not os.path.exists(file_path):
+    st.error("❌ File not found")
+    st.stop()
+
+df = pd.read_excel(file_path, engine="openpyxl")
 df.columns = df.columns.str.lower().str.strip()
 st.write(df.head())
 X = pd.DataFrame(data.data, columns=data.feature_names)
