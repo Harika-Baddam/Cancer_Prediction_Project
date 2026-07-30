@@ -15,7 +15,8 @@ corr = df.corr(numeric_only=True)
 
 df = df.drop(columns=['Patient_ID'], errors='ignore')
 df.columns = df.columns.str.lower().str.strip().str.replace(" ", "_")
-st.write(df.columns)
+st.write("Columns:", list(df.columns))
+st.write(filtered_df.columns)
 # EDA: Survival Status distribution
 sns.countplot(x='survival_status', data=df)
 plt.title("Survival Status Distribution")
@@ -50,9 +51,12 @@ plt.show()
 # -------------------------------
 # Boxplots (numeric vs categorical)
 # -------------------------------
-sns.boxplot(x='survival_status', y='age', data=df)
-plt.title("Age vs Survival Status")
-plt.show()
+if 'survival_status' in df.columns:
+    fig, ax = plt.subplots()
+    sns.boxplot(x='survival_status', y='age', data=df, ax=ax)
+    st.pyplot(fig)
+else:
+    st.error(f"Column not found. Available columns: {list(df.columns)}")
 
 sns.boxplot(x='recurrence', y='bmi', data=df)
 plt.title("BMI vs Recurrence")
