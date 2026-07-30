@@ -15,6 +15,20 @@ df = pd.read_csv("colorectal_cancer_prediction.csv")
 df.columns = df.columns.str.lower().str.strip()
 st.write(df.head())
 
+# -------------------------------
+# SIDEBAR FILTER
+# -------------------------------
+st.sidebar.header("🔍 Filter Data")
+
+if "survival_status" in df.columns:
+    selected_status = st.sidebar.selectbox(
+        "Select Survival Status",
+        df["survival_status"].unique()
+    )
+    filtered_df = df[df["survival_status"] == selected_status]
+else:
+    filtered_df = df
+
 # Age Distribution
 st.subheader("📊 Age Distribution")
 
@@ -25,15 +39,6 @@ if "age" in X.columns:
 else:
     st.info("Age column not available in dataset")
 
-# Survival Status
-st.subheader("🧬 Survival Status Distribution")
-
-y_series = pd.Series(y)
-
-fig, ax = plt.subplots()
-y_series.value_counts().plot(kind='bar', ax=ax)
-ax.set_xticklabels(["Malignant", "Benign"], rotation=0)
-st.pyplot(fig)
 
 # Heatmap
 st.subheader("🔥 Feature Correlation Heatmap")
@@ -54,6 +59,24 @@ if 'bmi' in df.columns:
 else:
     st.error("BMI column not found")
 
+# -------------------------------
+# BOXPLOTS
+# -------------------------------
+
+st.subheader("📦 Age vs Survival Status")
+
+if "survival_status" in filtered_df.columns and "age" in filtered_df.columns:
+    fig, ax = plt.subplots()
+    sns.boxplot(x="survival_status", y="age", data=filtered_df, ax=ax)
+    st.pyplot(fig)
+
+st.subheader("📦 BMI vs Recurrence")
+
+if "recurrence" in filtered_df.columns and "bmi" in filtered_df.columns:
+    fig, ax = plt.subplots()
+    sns.boxplot(x="recurrence", y="bmi", data=filtered_df, ax=ax)
+    st.pyplot(fig)
+
 # Time to reccurance
 st.subheader("⏳ Time_to_Recurrence")
 
@@ -63,6 +86,7 @@ if 'time_to_recurrence' in df.columns:
     st.pyplot(fig)
 else:
     st.error("Time_to_recurrence column not found")
+
 
 # Treatment vs Outcomes
 # -------------------------------
