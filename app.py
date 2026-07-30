@@ -43,7 +43,7 @@ sns.heatmap(pd.DataFrame(X).corr(), cmap="coolwarm", ax=ax)
 st.pyplot(fig)
 
 # BMI
-st.subheader("⚖️ BMI Analysis")
+st.subheader("BMI")
 
 if "bmi" in X.columns:
     fig, ax = plt.subplots()
@@ -53,7 +53,7 @@ else:
     st.warning("BMI column not available in dataset")
 
 # Time to reccurance
-st.subheader("⏳ Time to Recurrence")
+st.subheader("⏳ Time_to_Recurrence")
 
 if "time_to_recurrence" in X.columns:
     fig, ax = plt.subplots()
