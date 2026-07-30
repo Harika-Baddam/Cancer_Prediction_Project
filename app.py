@@ -2,20 +2,40 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.datasets import load_breast_cancer
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
+import os
 
-# Title
-st.title("🧬 Cancer Prediction App")
-st.write("Predict whether a tumor is Benign or Malignant")
+st.set_page_config(page_title="Cancer Dashboard", layout="wide")
+st.title("🧬 Colorectal Cancer Analysis & Prediction")
 
 
-# Load dataset
-df = pd.read_csv("colorectal_cancer_prediction.csv")
+# -------------------------------
+# LOAD DATA (AUTO DETECT FORMAT)
+# -------------------------------
+file_csv = "colorectal_cancer_prediction.csv"
+file_excel = "colorectal_cancer_prediction.xlsx"
+
+df = None
+
+if os.path.exists(file_csv):
+    df = pd.read_csv(file_csv)
+elif os.path.exists(file_excel):
+    try:
+        df = pd.read_excel(file_excel, engine="openpyxl")
+    except:
+        st.error("❌ Excel file corrupted. Try saving again as CSV.")
+        st.stop()
+else:
+    st.error("❌ Dataset not found in folder")
+    st.stop()
+
+# -------------------------------
+# CLEAN COLUMN NAMES
+# -------------------------------
 df.columns = df.columns.str.lower().str.strip()
+
+st.subheader("📂 Dataset Preview")
 st.write(df.head())
-st.write(df.columns)
+st.write("Columns in dataset:", df.columns)
 
 # -------------------------------
 # SIDEBAR FILTER
@@ -31,85 +51,90 @@ if "survival_status" in df.columns:
 else:
     filtered_df = df
 
-# Age Distribution
-st.subheader("📊 Age Distribution")
-
-if "age" in X.columns:
+# -------------------------------
+# AGE DISTRIBUTION
+# -------------------------------
+if "age" in filtered_df.columns:
+    st.subheader("📊 Age Distribution")
     fig, ax = plt.subplots()
-    sns.histplot(X["age"], kde=True, ax=ax)
+    sns.histplot(filtered_df["age"], kde=True, ax=ax)
     st.pyplot(fig)
-else:
-    st.info("Age column not available in dataset")
 
-
-# Heatmap
-st.subheader("🔥 Feature Correlation Heatmap")
-
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.heatmap(pd.DataFrame(X).corr(), cmap="coolwarm", ax=ax)
-st.pyplot(fig)
-
-# BMI
-st.subheader("⚖️ BMI Distribution")
-
-if 'bmi' in df.columns:
-    st.write("BMI available")
-    st.write("Columns:", df.columns)
+# -------------------------------
+# BMI DISTRIBUTION
+# -------------------------------
+if "bmi" in filtered_df.columns:
+    st.subheader("⚖️ BMI Distribution")
     fig, ax = plt.subplots()
-    sns.histplot(df['bmi'], bins=30, kde=True, ax=ax)
+    sns.histplot(filtered_df["bmi"], kde=True, ax=ax)
     st.pyplot(fig)
-else:
-    st.error("BMI column not found")
+
+# -------------------------------
+# TIME TO RECURRENCE
+# -------------------------------
+if "time_to_recurrence" in filtered_df.columns:
+    st.subheader("⏳ Time to Recurrence")
+    fig, ax = plt.subplots()
+    sns.histplot(filtered_df["time_to_recurrence"], kde=True, ax=ax)
+    st.pyplot(fig)
 
 # -------------------------------
 # BOXPLOTS
 # -------------------------------
-
-st.subheader("📦 Age vs Survival Status")
-
 if "survival_status" in filtered_df.columns and "age" in filtered_df.columns:
+    st.subheader("📦 Age vs Survival Status")
     fig, ax = plt.subplots()
     sns.boxplot(x="survival_status", y="age", data=filtered_df, ax=ax)
     st.pyplot(fig)
 
-st.subheader("📦 BMI vs Recurrence")
-
 if "recurrence" in filtered_df.columns and "bmi" in filtered_df.columns:
+    st.subheader("📦 BMI vs Recurrence")
     fig, ax = plt.subplots()
     sns.boxplot(x="recurrence", y="bmi", data=filtered_df, ax=ax)
     st.pyplot(fig)
 
-# Time to reccurance
-st.subheader("⏳ Time_to_Recurrence")
-
-if 'time_to_recurrence' in df.columns:
+# -------------------------------
+# COUNT PLOTS
+# -------------------------------
+if "chemotherapy_received" in filtered_df.columns and "survival_status" in filtered_df.columns:
+    st.subheader("💊 Chemotherapy vs Survival")
     fig, ax = plt.subplots()
-    sns.histplot(df['time_to_recurrence'], bins=30, kde=True, ax=ax)
+    sns.countplot(x="chemotherapy_received", hue="survival_status", data=filtered_df, ax=ax)
     st.pyplot(fig)
-else:
-    st.error("Time_to_recurrence column not found")
 
-
-# Treatment vs Outcomes
-# -------------------------------
-st.subheader("💊 Chemotherapy vs Survival")
-
-fig, ax = plt.subplots()
-sns.countplot(x='Chemotherapy_Received', hue='Survival_Status', data=df, ax=ax)
-ax.set_title("Chemotherapy vs Survival Status")
-st.pyplot(fig)
-
-st.subheader("🏥 Surgery vs Recurrence")
-
-fig, ax = plt.subplots()
-sns.countplot(x='Surgery_Received', hue='Recurrence', data=df, ax=ax)
-ax.set_title("Surgery vs Recurrence")
-st.pyplot(fig)
+if "surgery_received" in filtered_df.columns and "recurrence" in filtered_df.columns:
+    st.subheader("🏥 Surgery vs Recurrence")
+    fig, ax = plt.subplots()
+    sns.countplot(x="surgery_received", hue="recurrence", data=filtered_df, ax=ax)
+    st.pyplot(fig)
 
 # -------------------------------
-# FIND TARGET COLUMN AUTOMATICALLY
+# HEATMAP
 # -------------------------------
-possible_targets = ["survival_status", "survival", "status", "outcome"]
+st.subheader("🔥 Correlation Heatmap")
+
+try:
+    fig, ax = plt.subplots(figsize=(10,6))
+    sns.heatmap(filtered_df.corr(numeric_only=True), cmap="coolwarm", ax=ax)
+    st.pyplot(fig)
+except:
+    st.warning("Heatmap not available")
+
+# -------------------------------
+# MACHINE LEARNING MODEL
+# -------------------------------
+# -------------------------------
+# FIND TARGET COLUMN (FIXED)
+# -------------------------------
+possible_targets = [
+    "survival_status",
+    "survival",
+    "status",
+    "outcome",
+    "diagnosis",
+    "result",
+    "recurrence"
+]
 
 target_col = None
 
@@ -118,50 +143,48 @@ for col in possible_targets:
         target_col = col
         break
 
+# -------------------------------
+# IF NOT FOUND → SHOW OPTIONS
+# -------------------------------
 if target_col is None:
-    st.error("❌ No target column found (survival/status)")
-    st.stop()
+    st.error("❌ No target column found")
 
+    # 🔥 LET USER SELECT TARGET
+    target_col = st.selectbox("Select Target Column", df.columns)
 
 # -------------------------------
-# MACHINE LEARNING MODEL (FINAL FIX)
+# MACHINE LEARNING
 # -------------------------------
 st.subheader("🤖 Cancer Prediction Model")
 
-if "survival_status" in df.columns:
+X = df.drop(columns=[target_col])
+y = df[target_col]
 
-    # ✅ DEFINE X AND y FIRST (THIS WAS MISSING)
-    X = df.drop(columns=["survival_status"])
-    y = df["survival_status"]
+# Convert categorical target if needed
+if y.dtype == "object":
+    y = y.astype("category").cat.codes
 
-    # ✅ Use only numeric columns
-    X = X.select_dtypes(include=["number"])
+# Use numeric features only
+X = X.select_dtypes(include=["number"])
 
-    # ✅ Handle missing values
-    X = X.fillna(X.mean())
+# Fill missing values
+X = X.fillna(X.mean())
 
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
 
-    # ✅ Split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
-    # ✅ Scale
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-    # ✅ Train model
-    model = LogisticRegression(max_iter=5000)
-    model.fit(X_train, y_train)
+model = LogisticRegression(max_iter=5000)
+model.fit(X_train, y_train)
 
-    # ✅ Accuracy
-    accuracy = model.score(X_test, y_test)
+accuracy = model.score(X_test, y_test)
 
-    st.success(f"✅ Model Accuracy: {round(accuracy*100,2)}%")
-
-else:
-    st.warning("❌ survival_status column not found")
+st.success(f"✅ Model Accuracy: {round(accuracy*100,2)}%")
