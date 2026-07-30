@@ -5,12 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load data
-
-try:
-    df = pd.read_excel("colorectal_cancer_prediction.xlsx", engine="openpyxl")
-except Exception as e:
-    st.error(f"Error loading file: {e}")
-    st.stop()
+    df = pd.read_csv("colorectal_cancer_prediction.csv")
 
 # -------------------------------
 # CLEAN COLUMN NAMES
