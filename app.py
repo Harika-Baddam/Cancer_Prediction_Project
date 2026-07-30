@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-df = pd.read_csv(r"D:\internship\SMDB-project3\colorectal_cancer_prediction.csv")
+df = pd.read_csv("colorectal_cancer_prediction.csv")
 df.head()
 df.shape
 df.info()
