@@ -43,24 +43,40 @@ sns.heatmap(pd.DataFrame(X).corr(), cmap="coolwarm", ax=ax)
 st.pyplot(fig)
 
 # BMI
-st.subheader("BMI")
+st.subheader("⚖️ BMI Distribution")
 
-if "bmi" in X.columns:
+if 'bmi' in df.columns:
     fig, ax = plt.subplots()
-    sns.histplot(X["bmi"], kde=True, ax=ax)
+    sns.histplot(df['bmi'], bins=30, kde=True, ax=ax)
     st.pyplot(fig)
 else:
-    st.warning("BMI column not available in dataset")
+    st.error("BMI column not found")
 
 # Time to reccurance
 st.subheader("⏳ Time_to_Recurrence")
 
-if "time_to_recurrence" in X.columns:
+if 'time_to_recurrence' in df.columns:
     fig, ax = plt.subplots()
-    sns.histplot(X["time_to_recurrence"], kde=True, ax=ax)
+    sns.histplot(df['time_to_recurrence'], bins=30, kde=True, ax=ax)
     st.pyplot(fig)
 else:
-    st.warning("Time to recurrence data not available")
+    st.error("Time_to_recurrence column not found")
+
+# Treatment vs Outcomes
+# -------------------------------
+st.subheader("💊 Chemotherapy vs Survival")
+
+fig, ax = plt.subplots()
+sns.countplot(x='Chemotherapy_Received', hue='Survival_Status', data=df, ax=ax)
+ax.set_title("Chemotherapy vs Survival Status")
+st.pyplot(fig)
+
+st.subheader("🏥 Surgery vs Recurrence")
+
+fig, ax = plt.subplots()
+sns.countplot(x='Surgery_Received', hue='Recurrence', data=df, ax=ax)
+ax.set_title("Surgery vs Recurrence")
+st.pyplot(fig)
 
 # Train model
 scaler = StandardScaler()
