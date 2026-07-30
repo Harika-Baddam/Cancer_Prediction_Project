@@ -3,19 +3,28 @@ import streamlit as st
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-df = pd.read_csv("colorectal_cancer_prediction.csv")
-df.head()
-df.shape
-df.info()
-df.isnull().sum()
-df.ffill(inplace=True)
-df.columns
-df.describe()
-corr = df.corr(numeric_only=True)
 
-df = df.drop(columns=['Patient_ID'], errors='ignore')
+df = pd.read_csv("colorectal_cancer_prediction.csv")
 df.columns = df.columns.str.lower().str.strip().str.replace(" ", "_")
 st.write("Columns:", list(df.columns))
+# Check for missing values
+df.isnull().sum()
+
+#if missing
+df.ffill(inplace=True)
+
+# Visualize survival status distribution
+sns.countplot(x='survival_status', data=df)
+plt.title("Survival Status Distribution")
+plt.show()
+
+# Correlation heatmap (numerical features only)
+corr = df.corr(numeric_only=True)
+
+sns.heatmap(corr, annot=True)
+plt.title("Correlation Heatmap")
+plt.show()
+
 # EDA: Survival Status distribution
 sns.countplot(x='survival_status', data=df)
 plt.title("Survival Status Distribution")
@@ -50,16 +59,14 @@ plt.show()
 # -------------------------------
 # Boxplots (numeric vs categorical)
 # -------------------------------
-if 'survival_status' in df.columns:
-    fig, ax = plt.subplots()
-    sns.boxplot(x='survival_status', y='age', data=df, ax=ax)
-    st.pyplot(fig)
-else:
-    st.error(f"Column not found. Available columns: {list(df.columns)}")
+sns.boxplot(x='survival_status', y='age', data=df)
+plt.title("Age vs Survival Status")
+plt.show()
 
 sns.boxplot(x='recurrence', y='bmi', data=df)
 plt.title("BMI vs Recurrence")
 plt.show()
+
 
 # -------------------------------
 # Treatment vs outcomes
