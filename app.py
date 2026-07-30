@@ -11,7 +11,7 @@ st.title("🧬 Cancer Prediction App")
 st.write("Predict whether a tumor is Benign or Malignant")
 
 # Load dataset
-df = pd.read_excel("colorectal_cancer_prediction.csv.xlsx")
+df = pd.read_excel("colorectal_cancer_prediction.xlsx")
 df.columns = df.columns.str.lower().str.strip()
 st.write(df.head())
 X = pd.DataFrame(data.data, columns=data.feature_names)
